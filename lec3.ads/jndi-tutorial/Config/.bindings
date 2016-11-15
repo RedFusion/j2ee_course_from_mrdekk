@@ -1,0 +1,15 @@
+capacityWarehouse/ClassName=ru.menkin.ea.lec3.jndi.CapacityWarehouse
+capacityWarehouse/FactoryName=ru.menkin.ea.lec3.jndi.CapacityWarehouseFactory
+
+capacityWarehouse/RefAddr/0/Type=name
+capacityWarehouse/RefAddr/0/Encoding=String
+capacityWarehouse/RefAddr/0/Content=Warehouse
+capacityWarehouse/RefAddr/1/Type=capacityWarehouse
+capacityWarehouse/RefAddr/1/Encoding=String
+capacityWarehouse/RefAddr/1/Content=1000.0
+capacityWarehouse/RefAddr/2/Type=capacityCategory
+capacityWarehouse/RefAddr/2/Encoding=String
+capacityWarehouse/RefAddr/2/Content=50.0
+capacityWarehouse/RefAddr/3/Type=time
+capacityWarehouse/RefAddr/3/Encoding=String
+capacityWarehouse/RefAddr/3/Content=5000

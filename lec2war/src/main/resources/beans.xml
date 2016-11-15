@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans 
+		xmlns="http://www.springframework.org/schema/beans"
+		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xmlns:context="http://www.springframework.org/schema/context"
+		xmlns:jms="http://www.springframework.org/schema/jms"
+		xsi:schemaLocation="http://www.springframework.org/schema/beans 
+							http://www.springframework.org/schema/beans/spring-beans.xsd
+							http://www.springframework.org/schema/context
+							http://www.springframework.org/schema/context/spring-context.xsd
+							http://www.springframework.org/schema/jms 
+							http://www.springframework.org/schema/jms/spring-jms.xsd" >
+	
+	<bean id="randomWarehouse" class="ru.menkin.ea.lec1.impl.Warehouse" >	
+		<property name="capacityWarehouse" value="#{capacityWarehouse.getCapacityWarehouse( )}" />
+		<property name="capacityCategory" value="#{capacityWarehouse.getCapacityCategory( )}" />
+	</bean>
+	
+	<bean id="randomStorage" class="ru.menkin.ea.lec1.impl.Storage" >
+		<property name="capacityWarehouse" value="#{capacityWarehouse.getCapacityWarehouse( )}" />
+		<property name="capacityCategory" value="#{capacityWarehouse.getCapacityCategory( )}" />
+	</bean>
+	
+	<bean id="officeCategory" class="ru.menkin.ea.lec1.impl.Category" >
+		<constructor-arg name="name" value="office" />
+	</bean>
+	
+	<bean id="randomProduct" class="ru.menkin.ea.lec1.impl.Product" >
+		<constructor-arg index="0" value="mouse"/>
+		<constructor-arg index="1" value="100.0"/>
+		<constructor-arg index="2" ref="officeCategory"/>
+	</bean>
+	
+	<bean id="controller" class="ru.menkin.ea.lec1.service.Controller">
+		<property name="warehouse" ref="randomWarehouse" />
+		<property name="storage" ref="randomStorage"/>
+		<property name="product" ref="randomProduct" />
+		<property name="category" ref="officeCategory" />
+		<property name="quantity" value="10.0" />
+	</bean>
+	
+	<bean id="runner" class="ru.menkin.ea.lec2.RunnerBean" init-method="init" >
+		<property name="controller" ref="controller" />
+	</bean>
+
+	<!-- Lesson 3 -->
+	
+	<!-- jee:jndi-lookup id="capacityWarehouse" jndi-name="java:global/Config/capacityWarehouse" / -->
+	<bean id="capacityWarehouse" class="org.springframework.jndi.JndiObjectFactoryBean" >
+		<property name="jndiName" value="java:global/Config/capacityWarehouse" />
+		<property name="lookupOnStartup" value="true" />
+	</bean>
+
+	<bean id="runner2" class="ru.menkin.ea.lec3.RunnerBean" init-method="init" >
+		<property name="capacityWarehouse" ref="capacityWarehouse" />
+		
+		<property name="warehouse" ref="randomWarehouse" />
+		<property name="product" ref="randomProduct" />
+		<property name="category" ref="officeCategory" />
+		<property name="quantity" value="10.0" />
+	</bean>
+	
+	<!-- Lesson 4 -->
+	
+	<context:annotation-config />
+	<context:component-scan base-package="ru.menkin.ea" />
+
+	<import resource="database.xml" />
+	
+	<bean id="runner3" class="ru.menkin.ea.lec4.RunnerBean" init-method="init">
+		<property name="categoryService" ref="categoryService" />
+		<property name="customerService" ref="customerService" />
+		<property name="productService" ref="productService" />
+		<property name="orderService" ref="orderService" />
+		<property name="orderItemService" ref="orderItemService" />
+		<property name="warehouseService" ref="warehouseService" />
+	</bean>
+	
+	<!-- Лекция 5 -->
+	
+	<bean id="runner4" class="ru.menkin.ea.lec5.RunnerBean" init-method="init" >
+		<property name="categoryService" ref="categoryService" />
+		<property name="customerService" ref="customerService" />
+		<property name="productService" ref="productService" />
+		<property name="orderService" ref="orderService" />
+		<property name="orderItemService" ref="orderItemService" />
+		<property name="warehouseService" ref="warehouseService" />
+	</bean>
+	
+	<!-- Лекция 7 -->
+	
+	<!-- Соединение с брокером -->
+	<bean id="connectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory" >
+		<property name="brokerURL" value="tcp://localhost:61616" />
+	</bean>
+	<bean id="jmsFactory" class="org.apache.activemq.pool.PooledConnectionFactory" destroy-method="stop" >
+		<property name="connectionFactory" ref="connectionFactory" />
+	</bean>
+	
+	<!-- Издатель -->
+	<bean id="jmsTemplate" class="org.springframework.jms.core.JmsTemplate" >
+		<property name="connectionFactory" ref="jmsFactory" />
+	</bean>
+	
+	<!-- очередь запросов -->
+	<bean id="requestsQueue" class="org.apache.activemq.command.ActiveMQQueue" >
+		<constructor-arg value="goods.requests" />
+	</bean>
+	
+	<!-- Получатель сообщений (контейнер JMS) -->
+	<jms:listener-container container-type="default" connection-factory="jmsFactory" acknowledge="auto" destination-type="queue" >
+		<jms:listener destination="goods.responses" ref="productsListener" method="onMessage" />
+	</jms:listener-container>
+	
+	<!-- beans -->
+	<bean id="productsListener" class="ru.menkin.ea.lec7.jms.ProductsListener" >
+		<property name="productService" ref="productService" />
+		<property name="categoryService" ref="categoryService" />
+		<property name="warehouseService" ref="warehouseService" />
+	</bean>
+	
+	<bean id="productsRequester" class="ru.menkin.ea.lec7.jms.Requester" init-method="request">
+		<property name="jmsTemplate" ref="jmsTemplate" />
+		<property name="destination" ref="requestsQueue" />
+	</bean>
+</beans>

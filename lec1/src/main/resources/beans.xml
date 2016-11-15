@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	http://www.springframework.org/schema/beans/spring-beans.xsd">
+	
+	<bean id="randomWarehouse" class="ru.menkin.ea.lec1.impl.Warehouse" >	
+	</bean>
+	
+	<bean id="randomStorage" class="ru.menkin.ea.lec1.impl.Storage" >
+	</bean>
+	
+	<bean id="officeCategory" class="ru.menkin.ea.lec1.impl.Category" >
+		<constructor-arg name="name" value="office" />
+	</bean>
+	
+	<bean id="randomProduct" class="ru.menkin.ea.lec1.impl.Product" >
+		<constructor-arg index="0" value="mouse"/>
+		<constructor-arg index="1" value="100.0"/>
+		<constructor-arg index="2" ref="officeCategory"/>
+	</bean>
+	
+	<bean id="controller" class="ru.menkin.ea.lec1.service.Controller" init-method="doTheWork" >
+		<property name="warehouse" ref="randomWarehouse" />
+		<property name="storage" ref="randomStorage"/>
+		<property name="product" ref="randomProduct" />
+		<property name="category" ref="officeCategory" />
+		<property name="quantity" value="10.0" />
+	</bean>
+	
+</beans>
